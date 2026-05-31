@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Roadmap Generator</title>
+
+  <!-- Google Fonts: Syne (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES  — theme tokens
+       ============================================================ */
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #141720;
+      --surface-2:   #1c2030;
+      --border:      #252a3a;
+      --text:        #e8eaf0;
+      --text-muted:  #7a829a;
+      --accent:      #6ee7b7;      /* emerald-ish */
+      --accent-2:    #818cf8;      /* indigo */
+      --accent-3:    #f472b6;      /* pink */
+      --warn:        #fbbf24;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --shadow:      0 8px 32px rgba(0,0,0,.45);
+      --transition:  .28s cubic-bezier(.4,0,.2,1);
+    }
+
+    [data-theme="light"] {
+      --bg:          #f0f2f7;
+      --surface:     #ffffff;
+      --surface-2:   #e8ebf4;
+      --border:      #d0d5e8;
+      --text:        #111827;
+      --text-muted:  #6b7280;
+      --shadow:      0 8px 32px rgba(0,0,0,.12);
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+    }
+
+    /* ============================================================
+       NOISE TEXTURE OVERLAY
+       ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .6;
+    }
+
+    /* ============================================================
+       SCROLLBAR
+       ============================================================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ============================================================
+       LAYOUT HELPERS
+       ============================================================ */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 18px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(13,15,20,.75);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    [data-theme="light"] header { background: rgba(240,242,247,.82); }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+    }
+
+    /* Theme toggle */
+    .theme-btn {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 50px;
+      padding: 7px 16px;
+      font-size: .82rem;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+
+    .theme-btn:hover {
+      background: var(--surface-2);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 56px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: .78rem;
+      color: var(--accent);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 28px;
+      animation: fadeUp .6s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      animation: fadeUp .6s .1s ease both;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(100deg, var(--accent), var(--accent-2), var(--accent-3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.7;
+      animation: fadeUp .6s .2s ease both;
+    }
+
+    /* ============================================================
+       CAREER SELECTOR GRID
+       ============================================================ */
+    .selector-section { padding-bottom: 60px; }
+
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: .75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Career cards grid */
+    .career-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .career-card {
+      cursor: pointer;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 16px 18px;
+      text-align: center;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp .5s ease both;
+    }
+
+    /* Stagger animation for cards */
+    .career-card:nth-child(1) { animation-delay: .05s; }
+    .career-card:nth-child(2) { animation-delay: .10s; }
+    .career-card:nth-child(3) { animation-delay: .15s; }
+    .career-card:nth-child(4) { animation-delay: .20s; }
+    .career-card:nth-child(5) { animation-delay: .25s; }
+    .career-card:nth-child(6) { animation-delay: .30s; }
+
+    .career-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--card-color-a, var(--accent)), var(--card-color-b, var(--accent-2)));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .career-card:hover::before, .career-card.active::before { opacity: .08; }
+
+    .career-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 32px rgba(0,0,0,.35), 0 0 0 1px var(--accent);
+    }
+
+    .career-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent), var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .career-card .icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .career-card .title {
+      font-family: 'Syne', sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      line-height: 1.3;
+    }
+
+    /* ============================================================
+       ROADMAP SECTION
+       ============================================================ */
+    #roadmap-section {
+      padding-bottom: 80px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .5s ease, transform .5s ease;
+      pointer-events: none;
+    }
+
+    #roadmap-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    /* ---- career meta bar ---- */
+    .roadmap-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .roadmap-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .roadmap-title .icon-lg { font-size: 2rem; }
+
+    /* ---- overall progress ---- */
+    .progress-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .progress-info { flex: 1; }
+
+    .progress-info .label {
+      font-size: .82rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .bar-outer {
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-inner {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    .progress-pct {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 56px;
+      text-align: right;
+    }
+
+    /* ---- stage columns ---- */
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 22px;
+    }
+
+    /* Stage card */
+    .stage-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow var(--transition), transform var(--transition);
+      animation: fadeUp .5s ease both;
+    }
+
+    .stage-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    /* Stage header ribbon */
+    .stage-header {
+      padding: 18px 22px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: .07;
+    }
+
+    .stage-card[data-level="beginner"]    .stage-header::after { background: #6ee7b7; }
+    .stage-card[data-level="intermediate"] .stage-header::after { background: #818cf8; }
+    .stage-card[data-level="advanced"]     .stage-header::after { background: #f472b6; }
+
+    .stage-badge {
+      font-family: 'Syne', sans-serif;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 11px;
+      border-radius: 99px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stage-card[data-level="beginner"]     .stage-badge { background: rgba(110,231,183,.15); color: #6ee7b7; }
+    .stage-card[data-level="intermediate"] .stage-badge { background: rgba(129,140,248,.15); color: #818cf8; }
+    .stage-card[data-level="advanced"]     .stage-badge { background: rgba(244,114,182,.15); color: #f472b6; }
+
+    .stage-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stage-body { padding: 18px 22px; }
+
+    /* Subsections inside stage */
+    .subsection { margin-bottom: 18px; }
+    .subsection:last-child { margin-bottom: 0; }
+
+    .subsection-title {
+      font-size: .74rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    /* Tags (skills, tools) */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 7px; }
+
+    .tag {
+      font-size: .78rem;
+      padding: 4px 11px;
+      border-radius: 99px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .tag:hover { background: var(--border); }
+
+    /* Checklist (projects + tasks) */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      cursor: pointer;
+      font-size: .88rem;
+      line-height: 1.4;
+      transition: color var(--transition);
+    }
+
+    .checklist li:hover { color: var(--accent); }
+
+    /* Custom checkbox */
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-2);
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: grid;
+      place-items: center;
+      transition: background var(--transition), border-color var(--transition);
+      font-size: .65rem;
+    }
+
+    .checklist li.done .check-box {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .checklist li.done .check-text { text-decoration: line-through; color: var(--text-muted); }
+
+    /* ---- duration pill ---- */
+    .duration-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    /* ============================================================
+       ANIMATIONS
+       ============================================================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .5; }
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      text-align: center;
+      font-size: .82rem;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 600px) {
+      .hero { padding: 52px 16px 40px; }
+      .stages-grid { grid-template-columns: 1fr; }
+      .career-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header>
+  <div class="container header-inner">
+    <div class="logo">
+      <div class="logo-icon">🗺️</div>
+      CareerPath
+    </div>
+    <!-- Dark/Light mode toggle -->
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+      <span id="themeIcon">☀️</span>
+      <span id="themeLabel">Light Mode</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">✦ Free & Interactive</div>
+    <h1>Build Your <span>Career Roadmap</span><br/>Step by Step</h1>
+    <p>Select a tech career path below and get a detailed, stage-by-stage learning plan with skills, tools, and hands-on projects.</p>
+  </div>
+</section>
+
+<!-- ===================== CAREER SELECTOR ===================== -->
+<section class="selector-section">
+  <div class="container">
+    <p class="section-label">Choose your path</p>
+    <div class="career-grid" id="careerGrid">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROADMAP ===================== -->
+<section id="roadmap-section">
+  <div class="container">
+    <div class="roadmap-header">
+      <div class="roadmap-title">
+        <span class="icon-lg" id="rmIcon"></span>
+        <span id="rmTitle"></span>
+      </div>
+    </div>
+
+    <!-- Overall progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <div class="label">Overall progress — check off tasks to advance</div>
+        <div class="bar-outer">
+          <div class="bar-inner" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+
+    <!-- Stage cards injected here -->
+    <div class="stages-grid" id="stagesGrid"></div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="container">
+    Made with ♥ · CareerPath Generator · All content is for guidance only
+  </div>
+</footer>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+  /* -------------------------------------------------------
+     1.  ROADMAP DATA
+     Each career has 3 stages: beginner, intermediate, advanced
+     Each stage has: name, skills[], tools[], projects[]
+     ------------------------------------------------------- */
+  const CAREERS = [
+    {
+      id: "webdev",
+      title: "Web Development",
+      icon: "💻",
+      stages: [
+        {
+          level: "beginner",
+          name: "Foundations",
+          duration: "3–4 months",
+          skills: ["HTML5 Semantics", "CSS3 & Flexbox", "JavaScript Basics", "Responsive Design", "Git & GitHub"],
+          tools: ["VS Code", "Chrome DevTools", "GitHub", "Figma (basics)"],
+          projects: ["Personal Portfolio Page", "CSS Animation Showcase", "Simple To-Do List App", "Tribute Page Clone"]
+        },
+        {
+          level: "intermediate",
+          name: "Frameworks & Backend",
+          duration: "5–6 months",
+          skills: ["React.js / Vue.js", "Node.js & Express", "REST APIs", "SQL & NoSQL Databases", "Authentication (JWT)"],
+          tools: ["React DevTools", "Postman", "MongoDB Atlas", "Heroku / Render", "npm / yarn"],
+          projects: ["Full-Stack Blog App", "E-Commerce Store", "Real-time Chat App", "Job Board with Auth"]
+        },
+        {
+          level: "advanced",
+          name: "Production & Scale",
+          duration: "4–5 months",
+          skills: ["TypeScript", "Next.js / Nuxt", "CI/CD Pipelines", "Docker & Containers", "Performance Optimization"],
+          tools: ["Vercel / Netlify", "GitHub Actions", "Docker", "Jest / Vitest", "Sentry"],
+          projects: ["SaaS Dashboard", "Micro-frontend Architecture", "Open-Source Contribution", "PWA with Offline Mode"]
+        }
+      ]
+    },
+    {
+      id: "aiml",
+      title: "AI / ML",
+      icon: "🤖",
+      stages: [
+        {
+          level: "beginner",
+          name: "Math & Python Basics",
+          duration: "3–4 months",
+          skills: ["Python 3 Fundamentals", "Linear Algebra", "Statistics & Probability", "Pandas & NumPy", "Data Visualization"],
+          tools: ["Jupyter Notebook", "Google Colab", "Matplotlib", "Kaggle"],
+          projects: ["EDA on Public Dataset", "Linear Regression from Scratch", "Titanic Survival Predictor", "Sales Forecasting"]
+        },
+        {
+          level: "intermediate",
+          name: "Core ML Algorithms",
+          duration: "5–6 months",
+          skills: ["Scikit-learn", "Supervised & Unsupervised Learning", "Feature Engineering", "Cross-Validation", "Intro to Neural Networks"],
+          tools: ["Scikit-learn", "TensorFlow / PyTorch (intro)", "MLflow", "DVC"],
+          projects: ["Spam Classifier", "Customer Churn Model", "Image Classifier (CNN)", "Sentiment Analyser"]
+        },
+        {
+          level: "advanced",
+          name: "Deep Learning & Deployment",
+          duration: "6+ months",
+          skills: ["Transformers & LLMs", "Transfer Learning", "MLOps & Model Serving", "Reinforcement Learning", "Ethical AI"],
+          tools: ["HuggingFace", "FastAPI", "Docker", "AWS SageMaker", "Weights & Biases"],
+          projects: ["Fine-tune an LLM", "Real-time Object Detection API", "Recommender System", "AI Research Paper Implementation"]
+        }
+      ]
+    },
+    {
+      id: "datascience",
+      title: "Data Science",
+      icon: "📊",
+      stages: [
+        {
+          level: "beginner",
+          name: "Data Literacy",
+          duration: "2–3 months",
+          skills: ["Excel & Google Sheets", "SQL Fundamentals", "Python Basics", "Statistics Essentials", "Data Cleaning"],
+          tools: ["Excel", "MySQL / PostgreSQL", "Jupyter", "Google Colab"],
+          projects: ["Exploratory Sales Analysis", "SQL Query Portfolio", "Cleaned Dirty Dataset", "Summary Statistics Report"]
+        },
+        {
+          level: "intermediate",
+          name: "Analysis & Visualisation",
+          duration: "4–5 months",
+          skills: ["Advanced SQL", "Pandas & Seaborn", "A/B Testing", "Business Intelligence", "Data Storytelling"],
+          tools: ["Tableau / Power BI", "dbt", "BigQuery", "Metabase"],
+          projects: ["Interactive BI Dashboard", "A/B Test Analysis", "Cohort Analysis", "Revenue Attribution Model"]
+        },
+        {
+          level: "advanced",
+          name: "ML & Data Engineering",
+          duration: "5–6 months",
+          skills: ["Machine Learning with sklearn", "Data Pipelines (Airflow)", "Cloud Data Warehouses", "Predictive Modelling", "Data Governance"],
+          tools: ["Apache Airflow", "Snowflake", "Spark", "Great Expectations", "dbt Cloud"],
+          projects: ["End-to-End ML Pipeline", "Real-time Analytics Dashboard", "Fraud Detection System", "Customer Segmentation Engine"]
+        }
+      ]
+    },
+    {
+      id: "cybersec",
+      title: "Cyber Security",
+      icon: "🔐",
+      stages: [
+        {
+          level: "beginner",
+          name: "Networking & OS Basics",
+          duration: "3–4 months",
+          skills: ["Networking (TCP/IP, DNS)", "Linux CLI", "Windows Security", "Cryptography Basics", "CIA Triad"],
+          tools: ["Wireshark", "VirtualBox / VMware", "Kali Linux", "Nmap"],
+          projects: ["Home Lab Setup", "Packet Analysis Report", "CTF Beginner Challenges", "Linux Hardening Checklist"]
+        },
+        {
+          level: "intermediate",
+          name: "Offensive & Defensive Security",
+          duration: "5–6 months",
+          skills: ["Penetration Testing", "OWASP Top 10", "Incident Response", "SIEM & Log Analysis", "Vulnerability Scanning"],
+          tools: ["Metasploit", "Burp Suite", "Splunk", "Nessus", "OpenVAS"],
+          projects: ["CTF Mid-level Challenges", "Vulnerable VM Exploitation", "Web App Pen Test Report", "SIEM Alert Dashboard"]
+        },
+        {
+          level: "advanced",
+          name: "Red/Blue Team & Cloud Security",
+          duration: "5–7 months",
+          skills: ["Red Team Operations", "Threat Intelligence", "Cloud Security (AWS/Azure)", "Malware Analysis", "Security Architecture"],
+          tools: ["Cobalt Strike (legal lab)", "YARA", "AWS Security Hub", "Ghidra", "Velociraptor"],
+          projects: ["Full Red Team Exercise", "Threat Intel Report", "Cloud Security Audit", "Custom YARA Rules Set"]
+        }
+      ]
+    },
+    {
+      id: "cloud",
+      title: "Cloud Computing",
+      icon: "☁️",
+      stages: [
+        {
+          level: "beginner",
+          name: "Cloud Fundamentals",
+          duration: "2–3 months",
+          skills: ["Cloud Concepts (IaaS/PaaS/SaaS)", "Linux Basics", "Networking (VPC, Subnets)", "Storage Basics", "IAM & Access Control"],
+          tools: ["AWS Free Tier", "Azure Free Account", "Google Cloud Free Tier", "Terraform (intro)"],
+          projects: ["Host a Static Website on S3", "Launch & SSH into EC2", "Set Up IAM Roles", "Basic VPC Configuration"]
+        },
+        {
+          level: "intermediate",
+          name: "Core Services & DevOps",
+          duration: "5–6 months",
+          skills: ["Compute, Storage & DB services", "Kubernetes Basics", "CI/CD on Cloud", "Infrastructure as Code", "Serverless Architecture"],
+          tools: ["Kubernetes (EKS/GKE)", "Terraform", "GitHub Actions", "Lambda / Cloud Functions", "RDS / Cloud SQL"],
+          projects: ["Deploy App on Kubernetes", "Serverless REST API", "CI/CD Pipeline", "Multi-tier Cloud Architecture"]
+        },
+        {
+          level: "advanced",
+          name: "Architecture & SRE",
+          duration: "5–6 months",
+          skills: ["Well-Architected Framework", "Cost Optimisation", "Observability & SLOs", "Multi-Cloud Strategy", "FinOps"],
+          tools: ["Prometheus & Grafana", "AWS Cost Explorer", "Pulumi", "ArgoCD", "Datadog"],
+          projects: ["Disaster Recovery Plan", "Cost Reduction Audit", "Multi-cloud Failover Setup", "SRE Runbook Creation"]
+        }
+      ]
+    },
+    {
+      id: "uiux",
+      title: "UI/UX Design",
+      icon: "🎨",
+      stages: [
+        {
+          level: "beginner",
+          name: "Design Principles",
+          duration: "2–3 months",
+          skills: ["Typography & Colour Theory", "Gestalt Principles", "Wireframing", "User Research Basics", "Design Systems Intro"],
+          tools: ["Figma", "FigJam", "Notion", "Maze (basics)"],
+          projects: ["Recreate a Popular App UI", "Personal Portfolio Design", "Simple Wireframe Set", "Mood Board Collection"]
+        },
+        {
+          level: "intermediate",
+          name: "Interaction & Research",
+          duration: "4–5 months",
+          skills: ["Prototyping & Micro-interactions", "Usability Testing", "Information Architecture", "Accessibility (WCAG)", "Motion Design"],
+          tools: ["Figma Advanced", "ProtoPie", "Hotjar", "Maze", "Miro"],
+          projects: ["High-fidelity App Prototype", "Usability Test Report", "Design System Library", "Redesign Case Study"]
+        },
+        {
+          level: "advanced",
+          name: "Strategy & Leadership",
+          duration: "4–6 months",
+          skills: ["UX Strategy", "Design Sprint Facilitation", "Cross-functional Collaboration", "Metrics & OKRs", "Handoff & Design Ops"],
+          tools: ["Figma Branching", "Zeroheight", "Lottie / After Effects", "FullStory", "Dovetail"],
+          projects: ["End-to-End Product Design", "Design Sprint Facilitation", "B2B SaaS Design System", "UX Audit & Recommendations"]
+        }
+      ]
+    }
+  ];
+
+  /* -------------------------------------------------------
+     2.  STATE
+     ------------------------------------------------------- */
+  let activeCareer = null;           // currently selected career object
+  const checked = new Set();        // Set of checked task IDs like "webdev-0-0"
+
+  /* -------------------------------------------------------
+     3.  BUILD CAREER SELECTOR CARDS
+     ------------------------------------------------------- */
+  const careerGrid = document.getElementById("careerGrid");
+
+  CAREERS.forEach(career => {
+    const card = document.createElement("div");
+    card.className = "career-card";
+    card.dataset.id = career.id;
+    card.innerHTML = `
+      <span class="icon">${career.icon}</span>
+      <div class="title">${career.title}</div>
+    `;
+    // On click, select this career
+    card.addEventListener("click", () => selectCareer(career));
+    careerGrid.appendChild(card);
+  });
+
+  /* -------------------------------------------------------
+     4.  SELECT CAREER — render roadmap
+     ------------------------------------------------------- */
+  function selectCareer(career) {
+    // Update active card styling
+    document.querySelectorAll(".career-card").forEach(c => c.classList.remove("active"));
+    document.querySelector(`.career-card[data-id="${career.id}"]`).classList.add("active");
+
+    activeCareer = career;
+
+    // Populate roadmap header
+    document.getElementById("rmIcon").textContent  = career.icon;
+    document.getElementById("rmTitle").textContent = career.title + " Roadmap";
+
+    // Build stage cards
+    buildStages(career);
+
+    // Show roadmap section with animation
+    const section = document.getElementById("roadmap-section");
+    section.classList.add("visible");
+
+    // Smooth scroll to roadmap
+    setTimeout(() => {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }
+
+  /* -------------------------------------------------------
+     5.  BUILD STAGE CARDS
+     ------------------------------------------------------- */
+  function buildStages(career) {
+    const grid = document.getElementById("stagesGrid");
+    grid.innerHTML = ""; // clear previous
+
+    career.stages.forEach((stage, sIdx) => {
+      const card = document.createElement("div");
+      card.className = "stage-card";
+      card.dataset.level = stage.level;
+      // small stagger
+      card.style.animationDelay = (sIdx * 0.1) + "s";
+
+      /* --- Skills tags --- */
+      const skillTags = stage.skills.map(s => `<span class="tag">${s}</span>`).join("");
+
+      /* --- Tools tags --- */
+      const toolTags = stage.tools.map(t => `<span class="tag">${t}</span>`).join("");
+
+      /* --- Projects checklist --- */
+      const projectItems = stage.projects.map((p, pIdx) => {
+        const taskId = `${career.id}-${sIdx}-${pIdx}`;
+        const done   = checked.has(taskId);
+        return `
+          <li class="${done ? "done" : ""}" data-task="${taskId}">
+            <span class="check-box">${done ? "✓" : ""}</span>
+            <span class="check-text">${p}</span>
+          </li>`;
+      }).join("");
+
+      card.innerHTML = `
+        <div class="stage-header">
+          <span class="stage-badge">${stage.level}</span>
+          <span class="stage-name">${stage.name}</span>
+        </div>
+        <div class="stage-body">
+          <div class="subsection">
+            <div class="subsection-title">📚 Skills to Learn</div>
+            <div class="tag-list">${skillTags}</div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">🛠️ Tools & Technologies</div>
+            <div class="tag-list">${toolTags}</div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">🚀 Projects to Build</div>
+            <ul class="checklist">${projectItems}</ul>
+          </div>
+          <div class="duration-pill">⏱️ Estimated: ${stage.duration}</div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    // Attach checklist click events
+    grid.querySelectorAll(".checklist li").forEach(li => {
+      li.addEventListener("click", () => toggleTask(li));
+    });
+
+    // Update progress bar
+    updateProgress(career);
+  }
+
+  /* -------------------------------------------------------
+     6.  TOGGLE TASK COMPLETION
+     ------------------------------------------------------- */
+  function toggleTask(li) {
+    const taskId = li.dataset.task;
+    const checkBox = li.querySelector(".check-box");
+
+    if (checked.has(taskId)) {
+      // Un-check
+      checked.delete(taskId);
+      li.classList.remove("done");
+      checkBox.textContent = "";
+    } else {
+      // Check
+      checked.add(taskId);
+      li.classList.add("done");
+      checkBox.textContent = "✓";
+    }
+
+    updateProgress(activeCareer);
+  }
+
+  /* -------------------------------------------------------
+     7.  UPDATE PROGRESS BAR
+     ------------------------------------------------------- */
+  function updateProgress(career) {
+    // Count total tasks for this career
+    let total = 0;
+    career.stages.forEach(s => total += s.projects.length);
+
+    // Count how many are checked
+    let done = 0;
+    career.stages.forEach((s, sIdx) => {
+      s.projects.forEach((_, pIdx) => {
+        if (checked.has(`${career.id}-${sIdx}-${pIdx}`)) done++;
+      });
+    });
+
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById("progressBar").style.width = pct + "%";
+    document.getElementById("progressPct").textContent = pct + "%";
+  }
+
+  /* -------------------------------------------------------
+     8.  DARK / LIGHT THEME TOGGLE
+     ------------------------------------------------------- */
+  const themeBtn   = document.getElementById("themeBtn");
+  const themeIcon  = document.getElementById("themeIcon");
+  const themeLabel = document.getElementById("themeLabel");
+
+  themeBtn.addEventListener("click", () => {
+    const html = document.documentElement;
+    if (html.getAttribute("data-theme") === "dark") {
+      html.setAttribute("data-theme", "light");
+      themeIcon.textContent  = "🌙";
+      themeLabel.textContent = "Dark Mode";
+    } else {
+      html.setAttribute("data-theme", "dark");
+      themeIcon.textContent  = "☀️";
+      themeLabel.textContent = "Light Mode";
+    }
+  });
+</script>
+
+</body>
+</html>
