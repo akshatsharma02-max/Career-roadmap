@@ -51,9 +51,6 @@ Career-Roadmap-Generator/
 * Include video tutorials and learning resources
 * User accounts and dashboard
 
-## 📸 Screenshot
-
-Add a screenshot of your project here after deployment.
 
 ## 👨‍💻 Author
 
